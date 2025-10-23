@@ -1,0 +1,43 @@
+{
+  "name": "movie-finder",
+  "display_name": "Movie Finder",
+  "version": "0.1.0",
+  "description": "Search TMDB for movies and return compact interactive results.",
+  "author": "Your Name",
+  "mcp": {
+    "mcp_version": "1.0",
+    "command": "/mcp"
+  },
+  "tools": [
+    {
+      "id": "search_movies",
+      "name": "Search Movies",
+      "description": "Search movies by query and return top results.",
+      "json_schema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Search term (movie title or keyword)" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 10, "default": 5 }
+        },
+        "required": ["query"]
+      },
+      "_meta": {
+        "openai": {
+          "outputTemplate": "{{#each results}}- **{{title}} ({{year}})** — {{overview}}\n{{/each}}"
+        }
+      }
+    },
+    {
+      "id": "movie_details",
+      "name": "Movie Details",
+      "description": "Get detailed info for a movie by its TMDB id.",
+      "json_schema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" }
+        },
+        "required": ["id"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Render deployment configuration
+services:
+  - type: web
+    name: movie-finder-mcp
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: TMDB_API_KEY
+        sync: false
+      - key: PORT
+        value: 8000
