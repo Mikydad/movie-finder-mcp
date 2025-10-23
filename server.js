@@ -11,6 +11,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
 const PORT = process.env.PORT || 8000;
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
@@ -20,6 +21,29 @@ if (!TMDB_API_KEY) {
 
 // Simple in-memory client-event streams for SSE (development only)
 const sseClients = new Map();
+
+// Cache for genres to avoid repeated API calls
+let genresCache = null;
+
+// Helper function to get genre names by IDs
+async function getGenresByIds(genreIds) {
+  if (!genresCache) {
+    try {
+      const genresUrl = `https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB_API_KEY}&language=en-US`;
+      const genresRes = await fetch(genresUrl);
+      const genresJson = await genresRes.json();
+      genresCache = genresJson.genres || [];
+    } catch (err) {
+      console.error('Error fetching genres:', err);
+      return [];
+    }
+  }
+  
+  return genreIds.map(id => {
+    const genre = genresCache.find(g => g.id === id);
+    return genre ? genre.name : 'Unknown';
+  });
+}
 
 // Helper: send an event to a connected SSE client
 function sendSseEvent(clientId, event) {
@@ -82,13 +106,15 @@ app.post('/mcp/messages', async (req, res) => {
         const tmdbRes = await fetch(tmdbUrl);
         const tmdbJson = await tmdbRes.json();
 
-        const results = (tmdbJson.results || []).slice(0, limit).map(m => ({
+        const results = await Promise.all((tmdbJson.results || []).slice(0, limit).map(async m => ({
           id: m.id,
           title: m.title,
           year: (m.release_date || '').slice(0, 4) || 'N/A',
           overview: m.overview || 'No overview',
-          score: m.vote_average || 0
-        }));
+          score: m.vote_average || 0,
+          poster_path: m.poster_path,
+          genres: m.genre_ids ? await getGenresByIds(m.genre_ids) : []
+        })));
 
         return res.json({ status: 'ok', tool: 'search_movies', results, message: 'Popular movies' });
       }
@@ -100,13 +126,15 @@ app.post('/mcp/messages', async (req, res) => {
       const tmdbRes = await fetch(tmdbUrl);
       const tmdbJson = await tmdbRes.json();
 
-      const results = (tmdbJson.results || []).slice(0, limit).map(m => ({
+      const results = await Promise.all((tmdbJson.results || []).slice(0, limit).map(async m => ({
         id: m.id,
         title: m.title,
         year: (m.release_date || '').slice(0, 4) || 'N/A',
         overview: m.overview || 'No overview',
-        score: m.vote_average || 0
-      }));
+        score: m.vote_average || 0,
+        poster_path: m.poster_path,
+        genres: m.genre_ids ? await getGenresByIds(m.genre_ids) : []
+      })));
 
       const responsePayload = { status: 'ok', tool: 'search_movies', results };
 
@@ -131,7 +159,8 @@ app.post('/mcp/messages', async (req, res) => {
         overview: tmdbJson.overview || 'No overview',
         runtime: tmdbJson.runtime || null,
         genres: (tmdbJson.genres || []).map(g => g.name),
-        score: tmdbJson.vote_average || 0
+        score: tmdbJson.vote_average || 0,
+        poster_path: tmdbJson.poster_path
       };
 
       sendSseEvent(clientId, { type: 'tool_result', tool: 'movie_details', details });
