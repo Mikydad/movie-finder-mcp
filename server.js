@@ -138,6 +138,13 @@ app.get('/manifest.json', (req, res) => {
   res.sendFile(path.join(__dirname, 'manifest.json'));
 });
 
+// OpenAPI schema endpoint for GPT Builder
+app.get('/openapi.json', (req, res) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  res.sendFile(path.join(__dirname, 'openapi.json'));
+});
+
 app.listen(PORT, () => {
   console.log(`Movie Finder MCP server listening on http://localhost:${PORT}`);
 });

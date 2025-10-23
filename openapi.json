@@ -1,0 +1,116 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Movie Finder MCP Server",
+    "description": "Search TMDB for movies and return compact interactive results",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "https://movie-finder-mcp-production.up.railway.app",
+      "description": "Movie Finder MCP Server"
+    }
+  ],
+  "paths": {
+    "/mcp/messages": {
+      "post": {
+        "summary": "MCP Message Handler",
+        "description": "Handle MCP tool calls for movie search and details",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tool": {
+                    "type": "string",
+                    "enum": ["search_movies", "movie_details"],
+                    "description": "The tool to execute"
+                  },
+                  "input": {
+                    "type": "object",
+                    "description": "Input parameters for the tool"
+                  }
+                },
+                "required": ["tool"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "tool": {
+                      "type": "string"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "year": {
+                            "type": "string"
+                          },
+                          "overview": {
+                            "type": "string"
+                          },
+                          "score": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "details": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "year": {
+                          "type": "string"
+                        },
+                        "overview": {
+                          "type": "string"
+                        },
+                        "runtime": {
+                          "type": "integer"
+                        },
+                        "genres": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "score": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
