@@ -75,7 +75,23 @@ app.post('/mcp/messages', async (req, res) => {
     if (tool === 'search_movies') {
       const query = (input.query || '').trim();
       const limit = Number(input.limit || 5);
-      if (!query) return res.status(400).json({ error: 'missing query' });
+      
+      // If no query provided, return popular movies
+      if (!query) {
+        const tmdbUrl = `https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_API_KEY}&language=en-US&page=1`;
+        const tmdbRes = await fetch(tmdbUrl);
+        const tmdbJson = await tmdbRes.json();
+
+        const results = (tmdbJson.results || []).slice(0, limit).map(m => ({
+          id: m.id,
+          title: m.title,
+          year: (m.release_date || '').slice(0, 4) || 'N/A',
+          overview: m.overview || 'No overview',
+          score: m.vote_average || 0
+        }));
+
+        return res.json({ status: 'ok', tool: 'search_movies', results, message: 'Popular movies' });
+      }
 
       // Inform client via SSE that we're working (optional)
       sendSseEvent(clientId, { type: 'status', status: 'searching', query });
