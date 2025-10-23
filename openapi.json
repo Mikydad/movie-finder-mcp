@@ -27,14 +27,52 @@
                   "tool": {
                     "type": "string",
                     "enum": ["search_movies", "movie_details"],
-                    "description": "The tool to execute"
+                    "description": "The tool to execute: 'search_movies' for searching movies, 'movie_details' for getting detailed info"
                   },
                   "input": {
                     "type": "object",
-                    "description": "Input parameters for the tool"
+                    "description": "Input parameters for the tool",
+                    "properties": {
+                      "query": {
+                        "type": "string",
+                        "description": "Search query for movies (used with search_movies tool)"
+                      },
+                      "limit": {
+                        "type": "integer",
+                        "description": "Maximum number of results to return (used with search_movies tool)",
+                        "default": 5,
+                        "minimum": 1,
+                        "maximum": 10
+                      },
+                      "id": {
+                        "type": "integer",
+                        "description": "TMDB movie ID (used with movie_details tool)"
+                      }
+                    }
                   }
                 },
                 "required": ["tool"]
+              },
+              "examples": {
+                "search_movies": {
+                  "summary": "Search for movies",
+                  "value": {
+                    "tool": "search_movies",
+                    "input": {
+                      "query": "batman",
+                      "limit": 5
+                    }
+                  }
+                },
+                "movie_details": {
+                  "summary": "Get movie details",
+                  "value": {
+                    "tool": "movie_details",
+                    "input": {
+                      "id": 268
+                    }
+                  }
+                }
               }
             }
           }
@@ -48,60 +86,76 @@
                   "type": "object",
                   "properties": {
                     "status": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Response status"
                     },
                     "tool": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "The tool that was executed"
                     },
                     "results": {
                       "type": "array",
+                      "description": "Array of movie search results",
                       "items": {
                         "type": "object",
                         "properties": {
                           "id": {
-                            "type": "integer"
+                            "type": "integer",
+                            "description": "TMDB movie ID"
                           },
                           "title": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Movie title"
                           },
                           "year": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Release year"
                           },
                           "overview": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Movie plot summary"
                           },
                           "score": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "Average rating score"
                           }
                         }
                       }
                     },
                     "details": {
                       "type": "object",
+                      "description": "Detailed movie information",
                       "properties": {
                         "id": {
-                          "type": "integer"
+                          "type": "integer",
+                          "description": "TMDB movie ID"
                         },
                         "title": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Movie title"
                         },
                         "year": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Release year"
                         },
                         "overview": {
-                          "type": "string"
+                          "type": "string",
+                          "description": "Movie plot summary"
                         },
                         "runtime": {
-                          "type": "integer"
+                          "type": "integer",
+                          "description": "Movie runtime in minutes"
                         },
                         "genres": {
                           "type": "array",
+                          "description": "List of movie genres",
                           "items": {
                             "type": "string"
                           }
                         },
                         "score": {
-                          "type": "number"
+                          "type": "number",
+                          "description": "Average rating score"
                         }
                       }
                     }
