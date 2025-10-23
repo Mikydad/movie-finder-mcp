@@ -113,6 +113,7 @@ app.post('/mcp/messages', async (req, res) => {
           overview: m.overview || 'No overview',
           score: m.vote_average || 0,
           poster_path: m.poster_path,
+          poster_url: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : null,
           genres: m.genre_ids ? await getGenresByIds(m.genre_ids) : []
         })));
 
@@ -133,6 +134,7 @@ app.post('/mcp/messages', async (req, res) => {
         overview: m.overview || 'No overview',
         score: m.vote_average || 0,
         poster_path: m.poster_path,
+        poster_url: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : null,
         genres: m.genre_ids ? await getGenresByIds(m.genre_ids) : []
       })));
 
@@ -160,7 +162,8 @@ app.post('/mcp/messages', async (req, res) => {
         runtime: tmdbJson.runtime || null,
         genres: (tmdbJson.genres || []).map(g => g.name),
         score: tmdbJson.vote_average || 0,
-        poster_path: tmdbJson.poster_path
+        poster_path: tmdbJson.poster_path,
+        poster_url: tmdbJson.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbJson.poster_path}` : null
       };
 
       sendSseEvent(clientId, { type: 'tool_result', tool: 'movie_details', details });
